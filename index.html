@@ -178,6 +178,7 @@ td .row-dirty{background:#fffbf0}
       <button class="btn btn-secondary" onclick="openAddGuestModal()">+ Add Guest</button>
       <button class="btn btn-success" onclick="saveAllDirtyGuests()">💾 Save All Changes</button>
       <button class="btn btn-secondary btn-sm" onclick="printGuestList()">🖨 Print</button>
+      <button class="btn btn-secondary btn-sm" onclick="forceReseed()" title="Reset guest list to original data from Excel">🔄 Reset to Original</button>
     </div>
   </div>
   <div class="stats-row" id="gl-stats"></div>
@@ -508,6 +509,7 @@ async function loadAll(){
 // ═══════════════════════════════════════════════
 async function seedGuests(){
   const d=[
+    // Format: [ID, Name, Pax, Category, Side, RSVP, City, Type, Events, Notes, Vadhaai, Mameru, Reception, Haldi, Sangeet, Shaadi]
     ['G001','Hardik Bohra + wife',2,'Aman Close Friends',"Aman's side",'Pending','Ahmedabad','Couple','','','No','Yes','Yes','Yes','Yes','Yes'],
     ['G002','Nilesh Bohra & family',3,'Aman Close Friends',"Aman's side",'Pending','Ahmedabad','Family','','','No','No','Yes','No','No','No'],
     ['G003','Panth Shah + partner',2,'Aman Close Friends',"Aman's side",'Pending','Ahmedabad','Couple','','','No','Yes','Yes','Yes','Yes','Yes'],
@@ -667,6 +669,12 @@ async function saveAllDirtyGuests(){
   if(dirtyGuests.size===0){toast('No unsaved changes','warn');return;}
   try{setStatus('loading','Saving…');await saveAllGuests();dirtyGuests.clear();setStatus('ok','Saved');toast(`${dirtyGuests.size===0?'All':'Some'} guest changes saved ✓`,'success');renderGuestList();}
   catch(e){setStatus('err','Error');toast('Save failed: '+e.message,'error');}
+}
+
+async function forceReseed(){
+  if(!confirm('This will reset the guest list to the original data from your Excel sheet. Any changes you made in the app will be lost. Continue?'))return;
+  try{setStatus('loading','Resetting…');await seedGuests();dirtyGuests.clear();setStatus('ok','Reset done');toast('Guest list reset to original data ✓','success');renderAll();}
+  catch(e){setStatus('err','Error');toast('Reset failed: '+e.message,'error');}
 }
 
 async function saveSingleGuest(gid){

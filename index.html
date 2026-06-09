@@ -895,13 +895,13 @@ function autoGroupName(guestIds){
 
 function refreshGroupName(g){
   if(g.guestIds.length===0)return;
-  const idx=groups.indexOf(g);
-  const num=String(idx+1).padStart(3,'0');
+  const num=g.id.replace('RG','');
   const firstNames=g.guestIds.slice(0,3).map(id=>{
     const guest=guests.find(x=>x.id===id);
     return guest?guest.name.split(' ')[0].split('+')[0].trim():'';
   }).filter(Boolean);
-  g.name=`G${num} — ${firstNames.join(', ')}`;
+  const last=firstNames.length>1?firstNames.slice(0,-1).join(', ')+' & '+firstNames[firstNames.length-1]:firstNames[0];
+  g.name=`RG${num} — ${last}`;
 }
 
 // ═══════════════════════════════════════════════
@@ -996,8 +996,8 @@ function deleteGroup(id){
 
 function addGroup(){
   groupCounter++;
-  const newId=`GRP${String(groupCounter).padStart(3,'0')}`;
-  groups.unshift({id:newId,name:`G${String(groupCounter).padStart(3,'0')} — New Group`,guestIds:[],guestNames:'',pax:0,status:'Ungrouped',notes:''});
+  const newId=`RG${String(groupCounter).padStart(3,'0')}`;
+  groups.unshift({id:newId,name:`RG${String(groupCounter).padStart(3,'0')} — New Group`,guestIds:[],guestNames:'',pax:0,status:'Ungrouped',notes:''});
   renderGrouper();
   setTimeout(()=>document.getElementById('groups-area')?.firstChild?.querySelector('.grp-name-inp')?.focus(),50);
 }

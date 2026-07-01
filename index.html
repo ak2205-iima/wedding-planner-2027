@@ -209,6 +209,28 @@ tr:hover td{background:rgba(201,148,58,.04)}
 .tab-row{display:flex;gap:6px;margin-bottom:16px}
 .tab-btn{padding:6px 14px;font-size:12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);cursor:pointer;color:var(--text2);transition:all .15s}
 .tab-btn.active{background:var(--gold);color:#fff;border-color:var(--gold-dark);box-shadow:0 2px 6px rgba(201,148,58,.3)}
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px}
+.cal-header-title{font-size:18px;font-weight:700;color:var(--text)}
+.cal-nav-btn{background:var(--gold);color:#fff;border:none;border-radius:4px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600}
+.cal-nav-btn:hover{background:var(--gold-dark)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px}
+.cal-weekday{text-align:center;font-weight:700;color:var(--text2);font-size:12px;padding:8px;text-transform:uppercase}
+.cal-day{aspect-ratio:1/1;border:1px solid var(--border);border-radius:var(--r);padding:8px;font-size:11px;background:var(--surface);position:relative;min-height:60px;display:flex;flex-direction:column}
+.cal-day.other-month{background:var(--bg2);color:var(--text3)}
+.cal-day.today{border:2px solid var(--gold);background:var(--gold-light)}
+.cal-day-num{font-weight:600;color:var(--text);margin-bottom:4px}
+.cal-events{display:flex;flex-direction:column;gap:2px;flex:1;overflow:hidden}
+.cal-event{font-size:9px;padding:2px 4px;border-radius:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;font-weight:500}
+.cal-event.ahmedabad{background:#5B9BD5}
+.cal-event.travel{background:#70AD47}
+.cal-event.jalandhar{background:#E8558D}
+.cal-event-list{margin-top:20px}
+.cal-event-list-title{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--pink-dark)}
+.cal-event-item{display:grid;grid-template-columns:120px 1fr;gap:12px;margin-bottom:8px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);border-left:4px solid var(--gold)}
+.cal-event-item-date{font-size:12px;font-weight:600;color:var(--gold)}
+.cal-event-item-content{display:flex;flex-direction:column;gap:2px}
+.cal-event-item-title{font-size:13px;font-weight:600;color:var(--text)}
+.cal-event-item-meta{font-size:12px;color:var(--text3)}
 .tl-item{display:grid;grid-template-columns:90px 1fr;gap:12px;margin-bottom:0;position:relative}
 .tl-date{font-size:12px;color:var(--text2);text-align:right;padding-top:10px;font-weight:500}
 .tl-connector{display:flex;flex-direction:column;align-items:center;margin-right:8px}
@@ -1348,35 +1370,64 @@ function renderTimeline(){
     {date:'2027-02-04',title:'Vadhaai',loc:'Saurashtra Patel Party Plot, Ahmedabad',phase:'Ahmedabad',time:'Afternoon'},
     {date:'2027-02-05',title:'Mameru',loc:'Shree Radhe Farm, Bhat, Ahmedabad',phase:'Ahmedabad',time:'Afternoon'},
     {date:'2027-02-05',title:'Reception',loc:'Shree Radhe Farm, Bhat, Ahmedabad',phase:'Ahmedabad',time:'Evening'},
-    {date:'2027-02-14',title:'Baraat departs — train to Jalandhar',loc:'Ahmedabad/Gandhinagar → Jalandhar',phase:'Travel',time:'Morning/Afternoon'},
-    {date:'2027-02-15',title:'Baraat arrives · Check-in',loc:'Cabana Resorts, near Phagwara',phase:'Jalandhar',time:'Morning'},
+    {date:'2027-02-14',title:'Baraat departs - train to Jalandhar',loc:'Ahmedabad/Gandhinagar to Jalandhar',phase:'Travel',time:'Morning/Afternoon'},
+    {date:'2027-02-15',title:'Baraat arrives - Check-in',loc:'Cabana Resorts, near Phagwara',phase:'Jalandhar',time:'Morning'},
     {date:'2027-02-15',title:'Haldi',loc:'Cabana Resorts',phase:'Jalandhar',time:'Afternoon'},
     {date:'2027-02-15',title:'Sangeet & Engagement',loc:'Cabana Resorts',phase:'Jalandhar',time:'Evening'},
     {date:'2027-02-16',title:'Ganesh Staphna (Aman\'s side)',loc:'Cabana Resorts',phase:'Jalandhar',time:'Morning'},
     {date:'2027-02-16',title:'Baraat procession & Shaadi 💍',loc:'Cabana Resorts',phase:'Jalandhar',time:'Evening'},
-    {date:'2027-02-17',title:'Checkout · Return to Ahmedabad',loc:'Cabana Resorts → Jalandhar → Ahmedabad',phase:'Travel',time:'Morning'},
+    {date:'2027-02-17',title:'Checkout - Return to Ahmedabad',loc:'Cabana Resorts to Jalandhar to Ahmedabad',phase:'Travel',time:'Morning'},
   ];
-  const phaseColor={Ahmedabad:'var(--blue)',Jalandhar:'var(--pink)',Travel:'var(--green)'};
   const area=document.getElementById('tl-area');area.innerHTML='';
-  // Task deadlines grouped by month
-  const tasksByDue={};tasks.filter(t=>t.due&&t.status!=='Done').forEach(t=>{const m=t.due.substring(0,7);if(!tasksByDue[m])tasksByDue[m]=[];tasksByDue[m].push(t);});
-  // Events section
-  const evSec=document.createElement('div');evSec.innerHTML='<div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--pink-dark)">💍 Wedding Events</div>';
-  EVENTS.forEach((ev,i)=>{
-    const row=document.createElement('div');row.className='tl-item';
-    const color=phaseColor[ev.phase]||'var(--gray)';
-    row.innerHTML=`<div class="tl-date">${formatDateShort(ev.date)}</div>
-    <div style="display:flex;align-items:flex-start;gap:0;flex:1">
-      <div class="tl-connector"><div class="tl-dot" style="background:${color}"></div>${i<EVENTS.length-1?'<div class="tl-line"></div>':''}</div>
-      <div class="tl-content" style="flex:1;border-left:3px solid ${color}">
-        <div class="tl-title">${ev.title}</div>
-        <div class="tl-meta">📍 ${ev.loc}${ev.time?' · ⏰ '+ev.time:''}</div>
-      </div>
-    </div>`;
-    evSec.appendChild(row);
+  const calDiv=document.createElement('div');
+  const currentCal=new Date('2027-02-01');
+  const monthStr=currentCal.toLocaleString('default',{month:'long',year:'numeric'});
+  calDiv.innerHTML=`<div class="cal-header"><div class="cal-header-title">📅 ${monthStr}</div></div>`;
+  // Create event index by date
+  const eventsByDate={};
+  EVENTS.forEach(ev=>{if(!eventsByDate[ev.date])eventsByDate[ev.date]=[];eventsByDate[ev.date].push(ev);});
+  // Calendar grid
+  const gridDiv=document.createElement('div');gridDiv.className='cal-grid';
+  const weekdays=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  weekdays.forEach(day=>{const wd=document.createElement('div');wd.className='cal-weekday';wd.textContent=day;gridDiv.appendChild(wd);});
+  const firstDay=new Date(currentCal.getFullYear(),currentCal.getMonth(),1).getDay();
+  const daysInMonth=new Date(currentCal.getFullYear(),currentCal.getMonth()+1,0).getDate();
+  for(let i=0;i<firstDay;i++){const dayDiv=document.createElement('div');dayDiv.className='cal-day other-month';gridDiv.appendChild(dayDiv);}
+  for(let day=1;day<=daysInMonth;day++){
+    const dateStr=`2027-02-${String(day).padStart(2,'0')}`;
+    const dayDiv=document.createElement('div');dayDiv.className='cal-day';
+    const dayNum=document.createElement('div');dayNum.className='cal-day-num';dayNum.textContent=day;dayDiv.appendChild(dayNum);
+    const eventsDiv=document.createElement('div');eventsDiv.className='cal-events';
+    if(eventsByDate[dateStr]){
+      eventsByDate[dateStr].forEach(ev=>{
+        const evSpan=document.createElement('div');
+        evSpan.className=`cal-event ${ev.phase.toLowerCase()}`;
+        const shortTitle=ev.title.length>15?ev.title.substring(0,12)+'...':ev.title;
+        evSpan.textContent=shortTitle;
+        evSpan.title=ev.title;
+        eventsDiv.appendChild(evSpan);
+      });
+    }
+    dayDiv.appendChild(eventsDiv);
+    gridDiv.appendChild(dayDiv);
+  }
+  calDiv.appendChild(gridDiv);
+  area.appendChild(calDiv);
+  // Event list below calendar
+  const listDiv=document.createElement('div');listDiv.className='cal-event-list';
+  listDiv.innerHTML='<div class="cal-event-list-title">💍 Wedding Events Detail</div>';
+  EVENTS.forEach(ev=>{
+    const itemDiv=document.createElement('div');itemDiv.className='cal-event-item';
+    itemDiv.innerHTML=`<div class="cal-event-item-date">${formatDateShort(ev.date)}</div>
+      <div class="cal-event-item-content">
+        <div class="cal-event-item-title">${ev.title}</div>
+        <div class="cal-event-item-meta">📍 ${ev.loc}${ev.time?' | ⏰ '+ev.time:''}</div>
+      </div>`;
+    listDiv.appendChild(itemDiv);
   });
-  area.appendChild(evSec);
+  area.appendChild(listDiv);
   // Task deadlines section
+  const tasksByDue={};tasks.filter(t=>t.due&&t.status!=='Done').forEach(t=>{const m=t.due.substring(0,7);if(!tasksByDue[m])tasksByDue[m]=[];tasksByDue[m].push(t);});
   if(Object.keys(tasksByDue).length>0){
     const taskSec=document.createElement('div');taskSec.style.marginTop='28px';
     taskSec.innerHTML='<div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text2)">📋 Upcoming Task Deadlines</div>';
